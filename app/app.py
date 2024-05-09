@@ -87,6 +87,22 @@ def passwords():
 
     return json.dumps(results, cls=NumpyEncoder)
 
+@app.route('/api/string', methods=['POST'])
+def string():
+    data = request.get_json()
+    text = data['text']
+    # chunkify things if needed because of the memory limits for the deep learning model (TODO: double check this)
+    n = 50000
+    chunks = [text[i:i+n] for i in range(0, len(text), n)]
+    model_password_candidates = list()
+
+    for chunk in chunks:
+        # extract password candidates from the model
+        model_password_candidates.extend(extract_passwords_model(chunk))
+
+    print(f"[*] Number of model password candidates: {len(model_password_candidates)}")
+
+    return json.dumps(model_password_candidates, cls=NumpyEncoder)
 
 """
 Helpers

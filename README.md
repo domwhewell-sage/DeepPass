@@ -1,18 +1,31 @@
 # DeepPass
 
-Dockerized application that analyzes documents for password candidates.
+Dockerized application that analyzes documents and strings for password candidates.
 
 The blogpost ["DeepPass — Finding Passwords With Deep Learning"](https://posts.specterops.io/deeppass-finding-passwords-with-deep-learning-4d31c534cd00) gives more detail on the approach and development of the model.
 
-To run: `docker-compose up`
+To run: `docker compose up`
 
 This will expose http://localhost:5000 where documents can be uploaded.
 
-The API can manually be used at `http://localhost:5000/api/passwords` :
+# API endpoints
+
+## /api/passwords
+
+This API endpoint allows you to upload files for example :
 
 ```
 C:\Users\harmj0y\Documents\GitHub\DeepPass>curl -F "file=@test_doc.docx" http://localhost:5000/api/passwords
 [{"file_name": "test_doc.docx", "model_password_candidates": [{"left_context": ["for", "the", "production", "server", "is:"], "password": "P@ssword123!", "right_context": ["Please", "dont", "tell", "anyone", "on"]}, {"left_context": ["that", "the", "other", "password", "is"], "password": "LiverPool1", "right_context": [".", "This", "is", "our", "backup."]}], "regex_password_candidates": [{"left_context": ["for", "the", "production", "server", "is:"], "password": "P@ssword123!", "right_context": ["Please", "dont", "tell", "anyone", "on"]}], "custom_regex_matches": null}]
+```
+
+## /api/string
+
+This API endpoint allows you to send strings of text for example :
+
+```
+C:\Users\dom.whewell\Documents\GitHub\DeepPass>curl -X POST http://localhost:5000/api/string -H'Content-Type: application/json' --data '{"text": "The secret password for the production server is P@assword123!"}
+[{"left_context": ["for", "the", "production", "server", "is"], "password": "P@assword123!", "right_context": []}]
 ```
 
 [Apache Tika](https://hub.docker.com/r/apache/tika) is used to extract data from [various document formats](https://tika.apache.org/0.9/formats.html). [Tensorflow Serving](https://hub.docker.com/r/tensorflow/serving) is used for serving the model.
